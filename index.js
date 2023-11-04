@@ -33,11 +33,19 @@ async function run() {
 
     const database = client.db("libraryManage");
     const brandCollection = database.collection("categories");
+    const teamCollection = database.collection("team");
 
 
     // get the categories 
     app.get('/category', async(req,res) =>{
 const cursor = brandCollection.find()
+  const result = await cursor.toArray()
+  res.send(result)
+    })
+
+    // get the team
+    app.get('/team', async(req,res) =>{
+const cursor = teamCollection.find()
   const result = await cursor.toArray()
   res.send(result)
     })
