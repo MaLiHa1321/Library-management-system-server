@@ -14,7 +14,7 @@ app.use(express.json())
 // rdRKtcVeejWcSafK
 
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.ntnzcww.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -34,6 +34,7 @@ async function run() {
     const database = client.db("libraryManage");
     const brandCollection = database.collection("categories");
     const teamCollection = database.collection("team");
+    const bookCollection = database.collection("book");
 
 
     // get the categories 
@@ -43,12 +44,37 @@ const cursor = brandCollection.find()
   res.send(result)
     })
 
+    // get the dynamic id for brand crategories
+app.get('/category/:id', async(req,res) =>{
+  const id = req.params.id;
+  const query = {_id: new ObjectId(id)}
+  const result = await brandCollection.findOne(query)
+  res.send(result)
+})
+
     // get the team
     app.get('/team', async(req,res) =>{
 const cursor = teamCollection.find()
   const result = await cursor.toArray()
   res.send(result)
     })
+
+    // create book data
+app.post('/book', async(req,res) =>{
+
+  const newbook = req.body;
+  console.log(newbook)
+ 
+  const result = await bookCollection.insertOne(newbook);
+  res.send(result)
+})
+// get book data
+app.get('/book', async(req,res) =>{
+  const cursor = bookCollection.find()
+  const result = await cursor.toArray()
+  res.send(result)
+})
+
 
 
 
