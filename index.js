@@ -75,6 +75,34 @@ app.get('/book', async(req,res) =>{
   res.send(result)
 })
 
+// get id for book data update
+app.get('/book/:id', async(req,res) =>{
+  const id = req.params.id;
+  const query = {_id: new ObjectId(id)}
+  const result = await bookCollection.findOne(query)
+  res.send(result)
+})
+// for all books data update
+app.put('/book/:id', async(req,res) =>{
+  const id = req.params.id;
+  const filter = { _id: new ObjectId(id)}
+  const options = {upsert: true}
+  const updateproduct = req.body;
+  const product ={
+    $set: {
+      name : updateproduct.name,
+      quantity : updateproduct.quantity,
+      photo : updateproduct.photo,
+      type : updateproduct.type,
+      des : updateproduct.des,
+      author : updateproduct.author,
+      rating : updateproduct.rating
+    
+    }
+  }
+  const result = await bookCollection.updateOne(filter,product,options)
+  res.send(result)
+})
 
 
 
