@@ -39,6 +39,8 @@ async function run() {
 
     // get the categories 
     app.get('/category', async(req,res) =>{
+     
+
 const cursor = brandCollection.find()
   const result = await cursor.toArray()
   res.send(result)
@@ -61,7 +63,7 @@ const cursor = teamCollection.find()
 
     // create book data
 app.post('/book', async(req,res) =>{
-
+    
   const newbook = req.body;
   console.log(newbook)
  
@@ -70,9 +72,26 @@ app.post('/book', async(req,res) =>{
 })
 // get book data
 app.get('/book', async(req,res) =>{
-  const cursor = bookCollection.find()
+
+  // for filter data
+  let queryOb={}
+  const type = req.query.type;
+  if(type){
+    queryOb.type = type
+  }
+
+  // // pagination 
+  const page = Number(req.query.page);
+  const limit = Number(req.query.limit);
+  const skip = (page - 1)* limit;
+  const cursor = bookCollection.find(queryOb).skip(skip).limit(limit)
   const result = await cursor.toArray()
-  res.send(result)
+
+  // count data
+  const total = await bookCollection.countDocuments()
+  res.send({
+    total,result
+  })
 })
 
 // get id for book data update
@@ -103,6 +122,8 @@ app.put('/book/:id', async(req,res) =>{
   const result = await bookCollection.updateOne(filter,product,options)
   res.send(result)
 })
+
+
 
 
 
