@@ -35,6 +35,7 @@ async function run() {
     const brandCollection = database.collection("categories");
     const teamCollection = database.collection("team");
     const bookCollection = database.collection("book");
+    const cartCollection = database.collection("cart");
 
 
     // get the categories 
@@ -122,6 +123,32 @@ app.put('/book/:id', async(req,res) =>{
   const result = await bookCollection.updateOne(filter,product,options)
   res.send(result)
 })
+
+// creat cart data for user
+app.post('/cart', async(req,res) =>{
+    
+  const borrow = req.body;
+  const result = await cartCollection.insertOne(borrow);
+  res.send(result)
+})
+
+
+
+app.get('/cart', async(req, res) => {
+ 
+  // console.log(req.query.email)
+  let query ={}
+  if(req?.query?.email){
+    query= {email: req?.query?.email}
+  }
+
+  const cursor = cartCollection.find(query);
+  const result = await cursor.toArray();
+
+  // console.log('Result:', result);
+
+  res.send(result);
+});
 
 
 
