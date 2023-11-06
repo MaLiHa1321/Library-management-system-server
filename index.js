@@ -134,6 +134,10 @@ app.post('/cart', async(req,res) =>{
 
 
 
+
+
+
+
 app.get('/cart', async(req, res) => {
  
   // console.log(req.query.email)
@@ -150,7 +154,21 @@ app.get('/cart', async(req, res) => {
   res.send(result);
 });
 
+// delete item from cart
+app.delete('/cart/:id', async(req,res) =>{
+  const id = req.params.id;
+  const query = { _id: new ObjectId(id)};
+  const result= await cartCollection.deleteOne(query)
+  res.send(result)
+})
 
+app.get('/cart/:id', async(req,res) =>{
+  const id = req.params.id;
+  const query = { _id: new ObjectId(id)}
+  const result = await cartCollection.findOne(query)
+  res.send(result)
+  console.log(result)
+})
 
 
 
