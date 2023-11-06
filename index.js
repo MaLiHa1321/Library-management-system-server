@@ -1,17 +1,38 @@
 const express = require('express')
 const cors = require('cors')
+const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser')
 require('dotenv').config()
 const app = express()
 const port = process.env.PORT || 5000
 
 
 // middelware
-app.use(cors())
+app.use(cors(
+  {
+    origin: ['http://localhost:5173'],
+    credentials: true
+  }
+))
 app.use(express.json())
+app.use(cookieParser())
 
 
-// libraryManage
-// rdRKtcVeejWcSafK
+// verify token
+const verifyToken = async(req,res,next) =>{
+  const token = req.cookies?.token;
+  if(!token){
+    return res.status(401).send({message: "unauthorized access"})
+  }
+  jwt.verify(token, process.env.ACCES_TOKEN, (err,decode) => {
+
+    if(err){
+      return res.status(401).send({message: "unauthorized access"})
+    }
+    req.user = decode;
+    next();
+  })
+}
 
 
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
@@ -126,36 +147,31 @@ app.put('/book/:id', async(req,res) =>{
 
 // creat cart data for user
 app.post('/cart', async(req,res) =>{
-    
-  const borrow = req.body;
+   const borrow = req.body;
   const result = await cartCollection.insertOne(borrow);
   res.send(result)
 })
 
 
 
-
-
-
-
-app.get('/cart', async(req, res) => {
+app.get('/cart', verifyToken, async(req, res) => {
  
   // console.log(req.query.email)
+  if(req.user?.email !== req.query?.email){
+
+    return res.status(403).send({message: "Access forbidden"})
+  }
   let query ={}
   if(req?.query?.email){
     query= {email: req?.query?.email}
   }
-
   const cursor = cartCollection.find(query);
   const result = await cursor.toArray();
-
-  // console.log('Result:', result);
-
   res.send(result);
 });
 
 // delete item from cart
-app.delete('/cart/:id', async(req,res) =>{
+app.delete('/cart/:id', verifyToken, async(req,res) =>{
   const id = req.params.id;
   const query = { _id: new ObjectId(id)};
   const result= await cartCollection.deleteOne(query)
@@ -168,6 +184,28 @@ app.get('/cart/:id', async(req,res) =>{
   const result = await cartCollection.findOne(query)
   res.send(result)
   console.log(result)
+})
+
+// jwt 
+app.post('/jwt', async(req,res) =>{
+  const user = req.body;
+  console.log(user)
+  const token = jwt.sign(user, process.env.ACCES_TOKEN, {expiresIn: '10h'})
+  res
+  .cookie('token', token, {
+    httpOnly: true,
+    secure: false
+  })
+  .send({success: true})
+  
+})
+
+// logout user
+app.post('/logOut', async(req,res) =>{
+    const user = req.body;
+    res
+    .clearCookie('token', {maxAge: 0})
+    .send({success: true})
 })
 
 
