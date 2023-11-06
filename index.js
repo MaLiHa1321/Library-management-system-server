@@ -10,7 +10,11 @@ const port = process.env.PORT || 5000
 // middelware
 app.use(cors(
   {
-    origin: ['http://localhost:5173'],
+    origin: [
+      'http://localhost:5173',
+      'https://library-management-7f05c.web.app',
+      'https://library-management-7f05c.firebaseapp.com'
+     ],
     credentials: true
   }
 ))
@@ -192,10 +196,13 @@ app.post('/jwt', async(req,res) =>{
   console.log(user)
   const token = jwt.sign(user, process.env.ACCES_TOKEN, {expiresIn: '10h'})
   res
-  .cookie('token', token, {
-    httpOnly: true,
-    secure: false
-  })
+  res
+      .cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production', 
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+
+    })
   .send({success: true})
   
 })
@@ -203,8 +210,10 @@ app.post('/jwt', async(req,res) =>{
 // logout user
 app.post('/logOut', async(req,res) =>{
     const user = req.body;
-    res
-    .clearCookie('token', {maxAge: 0})
+    res.clearCookie('token', {maxAge: 0, httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', 
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict', }
+    )
     .send({success: true})
 })
 
