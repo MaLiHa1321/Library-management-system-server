@@ -97,7 +97,7 @@ app.post('/book', verifyToken, async(req,res) =>{
   res.send(result)
 })
 // get book data
-app.get('/book', verifyToken, async(req,res) =>{
+app.get('/book', async(req,res) =>{
 
   // for filter data
   let queryOb={}
