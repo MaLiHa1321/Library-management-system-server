@@ -54,7 +54,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     const database = client.db("libraryManage");
     const brandCollection = database.collection("categories");
@@ -88,7 +88,7 @@ const cursor = teamCollection.find()
     })
 
     // create book data
-app.post('/book', async(req,res) =>{
+app.post('/book', verifyToken, async(req,res) =>{
     
   const newbook = req.body;
   console.log(newbook)
@@ -97,7 +97,7 @@ app.post('/book', async(req,res) =>{
   res.send(result)
 })
 // get book data
-app.get('/book', async(req,res) =>{
+app.get('/book', verifyToken, async(req,res) =>{
 
   // for filter data
   let queryOb={}
@@ -121,7 +121,7 @@ app.get('/book', async(req,res) =>{
 })
 
 // get id for book data update
-app.get('/book/:id', async(req,res) =>{
+app.get('/book/:id',  async(req,res) =>{
   const id = req.params.id;
   const query = {_id: new ObjectId(id)}
   const result = await bookCollection.findOne(query)
@@ -152,12 +152,20 @@ app.put('/book/:id', async(req,res) =>{
 // creat cart data for user
 app.post('/cart', async(req,res) =>{
    const borrow = req.body;
+
+   const existingItem = await cartCollection.findOne({ _id: borrow._id });
+
+   if (existingItem) {
+     return res.status(400).json({ error: 'Item already exists in the cart' });
+   }
+
+
   const result = await cartCollection.insertOne(borrow);
   res.send(result)
 })
 
 
-
+// get the cart data and verify user
 app.get('/cart', verifyToken, async(req, res) => {
  
   // console.log(req.query.email)
@@ -228,8 +236,8 @@ app.post('/logOut', async(req,res) =>{
 
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    // await client.db("admin").command({ ping: 1 });
+    // console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
