@@ -166,6 +166,7 @@ app.post('/cart', async(req,res) =>{
 
 
 // get the cart data and verify user
+// localhost:5000/cart
 app.get('/cart', verifyToken, async(req, res) => {
  
   // console.log(req.query.email)
@@ -190,6 +191,7 @@ app.delete('/cart/:id', verifyToken, async(req,res) =>{
   res.send(result)
 })
 
+// get the each id for get the cart item to cart
 app.get('/cart/:id', async(req,res) =>{
   const id = req.params.id;
   const query = { _id: new ObjectId(id)}
