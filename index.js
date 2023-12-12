@@ -61,6 +61,7 @@ async function run() {
     const teamCollection = database.collection("team");
     const bookCollection = database.collection("book");
     const cartCollection = database.collection("cart");
+    const reviewCollection = database.collection("review");
 
 
     // get the categories 
@@ -149,6 +150,28 @@ app.put('/book/:id', async(req,res) =>{
   res.send(result)
 })
 
+// review book
+app.get('/review/:id', async(req,res) =>{
+  const id = req.params.id;
+  const query = {_id: new ObjectId(id)}
+  const result = await bookCollection.findOne(query)
+  res.send(result);
+})
+
+// post review
+app.post('/reviews', async(req,res) =>{
+  const reviews = req.body;
+  const result = await reviewCollection.insertOne(reviews);
+  res.send(result);
+})
+
+// get the review
+app.get('/allReviews', async(req,res) =>{
+  const cursor = reviewCollection.find()
+  const result = await cursor.toArray()
+  res.send(result)
+})
+
 // creat cart data for user
 app.post('/cart', async(req,res) =>{
    const borrow = req.body;
@@ -159,9 +182,15 @@ app.post('/cart', async(req,res) =>{
      return res.status(400).json({ error: 'Item already exists in the cart' });
    }
 
+   await bookCollection.updateOne(
+    { _id: borrow._id },
+    { $inc: { quantity: -1 } }
+  );
 
+  // Add the book to the cart
   const result = await cartCollection.insertOne(borrow);
-  res.send(result)
+  res.send(result);
+
 })
 
 
